@@ -1,31 +1,37 @@
 pipeline {
     agent any
     tools{
-        maven 'Maven 3.6.1'
+        nodejs 'NodeJS 8.9.0'
     }
     stages {
         stage('build') {
+             when{
+                changeset '**/result/**'
+             }
             steps {
                 echo 'Compiling worked app'
-                dir('worker'){
-                    sh 'mvn compile'
+                dir('result'){
+                    sh 'npm install'
                 }
             }
         }
          stage('test') {
+              when{
+                changeset '**/result/**'
+             }
             steps {
-                echo 'Running unit test on worker app'
+                echo 'Running unit test on result app'
+                dir('result'){
+                   sh 'npm test'
+                }
+               
             }
         }
-         stage('package') {
-            steps {
-                echo 'Packing worker app'
-            }
-        }
-    }
+     }
     post {
         always{
-            echo 'Build pipeline for worker is completed ...'
+            echo 'Build pipeline for result is completed ...'
         }
     }
 }
+
