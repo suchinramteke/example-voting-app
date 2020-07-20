@@ -1,12 +1,11 @@
 pipeline {
-    agent{
-        node {label 'labelName'}
+    agent {
         docker{
-            image 'maven:3.6.1-jdk-8-alpine'
+            image 'maven:3.6.1-jdk-8-slim'
             args '-v $HOME/.m2:/root/.m2'
         }
     }
-
+  
     stages {
         stage('build') {
             steps {
@@ -19,11 +18,18 @@ pipeline {
          stage('test') {
             steps {
                 echo 'Running unit test on worker app'
+                dir('worker'){
+                    sh 'mvn clean test'
+                }
             }
         }
          stage('package') {
             steps {
                 echo 'Packing worker app'
+                dir('worker'){
+                    sh 'mvn package -DskipTests'
+                    archiveArtifacts artifacts: '**/target/*.jar', fingerprint:true
+                }
             }
         }
     }
